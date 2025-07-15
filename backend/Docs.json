@@ -1,0 +1,244 @@
+{
+  "api/projects": {
+    "GET": {
+      "request": {},
+      "response": {
+        "status": 200,
+        "message": "Projects fetched successfully",
+        "data": [
+          {
+            "id": "project_id",
+            "title": "project_title",
+            "description": "project_description",
+            "Pic": "project_pic",
+            "sponsor": "project_sponsor",
+            "TimeToFinish": "DD/MM/YYYY"
+          }
+        ]
+      }
+    },
+    "POST": {
+      "request": {
+        "data": {
+          "id": "project_id",
+          "title": "project_title",
+          "description": "project_description",
+          "Pic": "project_pic",
+          "sponsor": "project_sponsor",
+          "TimeToFinish": "DD/MM/YYYY"
+        }
+      },
+      "response": {
+        "status": 201,
+        "message": "Project created successfully",
+        "data": {}
+      }
+    },
+    "PUT": {
+      "request": {
+        "data": {
+          "id": "Updated_project_id",
+          "title": "Updated_project_title",
+          "description": "Updated_project_description",
+          "Pic": "Updated_project_pic",
+          "sponsor": "Updated_project_sponsor",
+          "TimeToFinish": "DD/MM/YYYY"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Project updated successfully",
+        "data": {}
+      }
+    },
+    "DELETE": {
+      "request": {
+        "data": {
+          "id": "project_id"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Project deleted successfully",
+        "data": {}
+      }
+    }
+  },
+  "api/admin/login": {
+    "POST": {
+      "request": {
+        "data": {
+          "username": "username",
+          "password": "password"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Login successful",
+        "data": {
+          "Authorization": "Bearer <token>"
+        }
+      }
+    }
+  },
+  "api/admin/register": {
+    "POST": {
+      "request": {
+        "data": {
+          "username": "username",
+          "nickname": "password",
+          "role": "password",
+          "password": "password"
+        }
+      },
+      "response": {
+        "status": 201,
+        "message": "Register successful",
+        "data": {}
+      }
+    }
+  },
+  "api/admin/logout": {
+    "GET": {
+      "request": {
+        "data": {
+          "AuthorizationHeader": "Bearer <token>"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Logout successfully",
+        "data": {}
+      }
+    }
+  },
+  "api/admin/logs": {
+    "GET": {
+      "request": {
+        "data": {}
+      },
+      "response": {
+        "status": 200,
+        "message": "Logs shows successfully",
+        "data": [
+          {
+            "nickname": "nickname",
+            "role": "role",
+            "email": "email",
+            "task": {
+              "taskname": "name",
+              "taskdate": "taskdate",
+              "status": "Done",
+              "workedhours": "workedhours",
+              "taskid": "taskid"
+            }
+          }
+        ]
+      }
+    },
+    "POST": {
+      "request": {
+        "data": {
+          "nickname": "nickname",
+          "role": "role",
+          "email": "email",
+          "task": {
+            "taskname": "name",
+            "taskdate": "taskdate"
+          }
+        },
+        "response": {
+          "status": 200,
+          "message": "Log added successfully",
+          "data": {}
+        }
+      }
+    },
+    "PUT": {
+      "request": {
+        "data": {
+          "updatednickname": "nickname",
+          "updatedrole": "role",
+          "updatedemail": "email",
+          "updatedtask": {
+            "updatedtaskname": "name",
+            "taskdate": "taskdate",
+            "updatedstatus": "Done",
+            "updatedworkedhours": "workedhours"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Logs Updated successfully",
+        "data": {}
+      }
+    },
+    "DELETE": {
+      "request": {
+        "data": {
+          "taskid": "taskid"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Logs Removed successfully",
+        "data": {}
+      }
+    }
+  },
+  "api/admin/messages": {
+    "GET": {
+      "request": {
+        "data": {}
+      },
+      "response": {
+        "status": 200,
+        "message": "Login successful",
+        "data": [
+          {
+            "username": "username",
+            "email": "email",
+            "phonenum": "Phonenum",
+            "description": "Description",
+            "title": "title",
+            "knowby": "knowBy",
+            "date": "date",
+            "messageId": "messageId"
+          }
+        ]
+      }
+    },
+    "DELETE": {
+      "request": {
+        "data": {
+          "MessageId": "MessageId"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Message removed!",
+        "data": {}
+      }
+    }
+  },
+  "api/contact": {
+    "POST": {
+      "request": {
+        "data": {
+          "username": "username",
+          "email": "email",
+          "phonenum": "Phonenum",
+          "description": "Description",
+          "title": "title",
+          "knowby": "knowBy"
+        }
+      },
+      "response": {
+        "status": 200,
+        "message": "Form sent successfully",
+        "data": {}
+      }
+    }
+  }
+}
