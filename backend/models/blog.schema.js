@@ -36,7 +36,7 @@ const blogSchema = mongoose.Schema(
     writer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin", // only admins can write blogs
-      required: true,
+      required: true, // new comment
     },
     writer_pic: {
       type: String,
