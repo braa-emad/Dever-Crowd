@@ -78,10 +78,6 @@ const blogSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    featured_image: {
-      type: String,
-      required: false,
-    },
   },
   { timestamps: true }
 );

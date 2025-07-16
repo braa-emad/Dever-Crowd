@@ -3,6 +3,9 @@ const Blog = require("../models/blog.schema");
 const httpresponses = require("../utils/httpResponse");
 const asyncwrapper = require("../middlewares/asyncWrapper");
 const errorHandler = require("../utils/errorHandler");
+const generateUniqueSlug = require("../utils/generateSlug");
+
+const sortBlogs = require("../utils/SortingBlogs.js");
 
 const getAllBlogs = asyncwrapper(async (req, res, next) => {
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -23,16 +26,18 @@ const getAllBlogs = asyncwrapper(async (req, res, next) => {
     .skip(skip)
     .lean();
   if (!blogs) {
-    const error = errorHandler.create(
-      httpResponse.message.NoBlogsnow,
-      httpResponse.status.BlogsNowFound
-    );
+    const error = errorHandler.create({
+      status: httpResponse.message.NoBlogsnow,
+      message: httpResponse.status.BlogsNowFound,
+    });
     return next(error);
   }
+
+  const sortedBlogs = sortBlogs(blogs);
   res.json({
     status: httpresponses.status.ok,
     message: httpresponses.message.getAllBlogs,
-    data: { blogs },
+    data: { blogs: sortedBlogs },
   });
 });
 
@@ -45,14 +50,13 @@ const getSingleBlog = asyncwrapper(async (req, res, next) => {
     slug,
     ...(isAuthenticated ? {} : { status: "published" }),
   };
-  
-  const blog = await Blog.findOne(
-    query)
+
+  const blog = await Blog.findOne(query);
   if (!blog) {
-    const error = errorHandler.create(
-      httpresponses.status.notfound,
-      httpresponses.message.blogNotFound
-    );
+    const error = errorHandler.create({
+      status: httpresponses.status.notfound,
+      message: httpresponses.message.blogNotFound,
+    });
     return next(error);
   }
   if (!isAuthenticated) {
@@ -67,10 +71,10 @@ const getSingleBlog = asyncwrapper(async (req, res, next) => {
 
 const createBlog = asyncwrapper(async (req, res, next) => {
   if (!req.user) {
-    const error = errorHandler.create(
-      httpresponses.status.unauthorized,
-      httpresponses.message.unauthorized
-    );
+    const error = errorHandler.create({
+      status: httpresponses.status.unauthorized,
+      message: httpresponses.message.unauthorized,
+    });
     return next(error);
   }
   const blog = new Blog({
@@ -85,13 +89,101 @@ const createBlog = asyncwrapper(async (req, res, next) => {
     data: { blog },
   });
 });
+
+const publishBlog = asyncwrapper(async (req, res, next) => {
+  const slug = req.params.slug;
+
+  let blog = await Blog.findOne({ slug });
+
+  if (!blog) {
+    const error = errorHandler.create({
+      status: httpresponses.status.notfound,
+      message: httpresponses.message.blogNotFound,
+    });
+    return next(error);
+  }
+
+  if (req.user.id !== blog.writer.toString()) {
+    const error = errorHandler.create({
+      status: httpresponses.status.unauthorized,
+      message: httpresponses.message.unauthorized,
+    });
+    return next(error);
+  }
+
+  if (blog.status === "published") {
+    const error = errorHandler.create;
+  }
+
+  blog.status = "published";
+
+  blog.slug = await generateUniqueSlug(blog.title);
+  // send all images before store and make his decide the featured image
+  await blog.save();
+  res.json({
+    status: httpresponses.status.ok,
+    message: httpresponses.message.published_successfully,
+    data: { blog },
+  });
+});
+
 const modifyBlog = asyncwrapper(async (req, res, next) => {
-  console.log("update blog called");
+  const slug = req.params.slug;
+  const { title, subtitle, Category, featured_image, pic, tags, content } =
+    req.body;
+
+  let blog = await Blog.findOne({ slug });
+
+  if (!blog) {
+    const error = errorHandler.create({
+      status: httpresponses.status.notfound,
+      message: httpresponses.message.blogNotFound,
+    });
+    return next(error);
+  }
+
+  if (req.user.id !== blog.writer.toString()) {
+    const error = errorHandler.create({
+      status: httpresponses.status.unauthorized,
+      message: httpresponses.message.unauthorized,
+    });
+    return next(error);
+  }
+  blog.title = title || blog.title;// update the slug if needed
+  blog.subtitle = subtitle || blog.subtitle;
+  blog.Category = Category || blog.Category;
+  blog.featured_image = featured_image || blog.featured_image;
+  // blog.pic = pic || blog.pic; 
+  blog.tags = tags || blog.tags;
+  blog.content = content | blog.content;
+
+
 });
+
 const deleteBlog = asyncwrapper(async (req, res, next) => {
-  console.log("delete blog called");
+  const slug = req.params.slug;
+
+  let blog = await Blog.findOne({ slug });
+
+  if (!blog) {
+    const error = errorHandler.create({
+      status: httpresponses.status.notfound,
+      message: httpresponses.message.blogNotFound,
+    });
+    return next(error);
+  }
+
+  if (req.user.id !== blog.writer.toString()) {
+    const error = errorHandler.create({
+      status: httpresponses.status.unauthorized,
+      message: httpresponses.message.unauthorized,
+    });
+    return next(error);
+  }
+  await Blog.deleteOne({ _id: blog._id });
+
+  res.sendStatus(httpresponses.status.noContent);
 });
-// add this route to the blog routes'
 
 const addLike = asyncwrapper(async (req, res, next) => {
   console.log("add like called");
@@ -103,19 +195,6 @@ const addLike = asyncwrapper(async (req, res, next) => {
 const deleteLike = asyncwrapper(async (req, res, next) => {
   console.log("delete like called");
 });
-
-const publishBlog = asyncwrapper(async (req, res, next) => {
-  console.log("publish blog called");
-});
-// process workflow
-
-/*
-when user open the /create and type any thing this will send post request to the API to create a blog with draft status and this new blog should has title to make the slug to update then
-while typing we will make update every x seconds
-when click on the save button this will send a request to update endpoint and change the status to published
-
-
-*/
 
 module.exports = {
   getAllBlogs,

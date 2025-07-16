@@ -4,6 +4,7 @@ const blogController = require("../controller/blog.controller");
 const auth = require("../middlewares/auth");
 const roles = require("../utils/roles");
 const slug = require("../middlewares/slugMiddleware");
+//validation required
 router
   .route("/")
   .get(auth.verifyToken, blogController.getAllBlogs)
