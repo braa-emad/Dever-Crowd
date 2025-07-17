@@ -1,4 +1,5 @@
 const { body } = require("express-validator");
+const sanitizeHtml = require("sanitize-html");
 
 const projectValidtor = () => [
   body("title")
@@ -150,12 +151,8 @@ const taskValidtor = () => [
 ];
 
 const loginValidator = () => [
-  body("username")
-    .notEmpty()
-    .withMessage("Username is required"),
-  body("password")
-    .notEmpty()
-    .withMessage("Password is required")
+  body("username").notEmpty().withMessage("Username is required"),
+  body("password").notEmpty().withMessage("Password is required"),
 ];
 
 const registerValidator = () => [
@@ -212,7 +209,59 @@ const registerValidator = () => [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Email must be valid"),
-    body("pic").optional().isURL().withMessage("Image must be a valid URL"),
+  body("pic").optional().isURL().withMessage("Image must be a valid URL"),
+];
+const sanitizeContent = (value) =>
+  sanitizeHtml(value || "", {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2"]),
+    allowedAttributes: {
+      a: ["href", "target"],
+      img: ["src", "alt", "style"],
+      "*": ["style"],
+    },
+    allowedSchemes: ["http", "https", "data"],
+    disallowedTagsMode: "discard",
+  });
+
+const blogValidation = [
+  body("title")
+    .isString()
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("Title is required"),
+
+  body("subtitle").optional().isString().trim().escape(),
+
+  body("category")
+    .isString()
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("Category is required"),
+
+  body("writer").isMongoId().withMessage("Invalid writer ID"),
+
+  body("writer_pic")
+    .optional()
+    .isURL()
+    .withMessage("Writer pic must be a valid URL"),
+
+  body("featured_image")
+    .optional()
+    .isURL()
+    .withMessage("Featured image must be a valid URL"),
+
+  body("status")
+    .optional()
+    .isIn(["draft", "published"])
+    .withMessage("Status must be 'draft' or 'published'"),
+
+  body("slug").notEmpty().withMessage("Slug is required").trim().escape(),
+
+  body("content").optional().isString().customSanitizer(sanitizeContent),
+
+  body("publish_date").optional().isISO8601().toDate(),
 ];
 
 module.exports = {
@@ -222,4 +271,5 @@ module.exports = {
   loginValidator,
   registerValidator,
   taskValidtor,
+  blogValidation,
 };

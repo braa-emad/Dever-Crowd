@@ -3,11 +3,13 @@ const router = express.Router();
 const blogController = require("../controller/blog.controller");
 const auth = require("../middlewares/auth");
 const roles = require("../utils/roles");
-const slug = require("../middlewares/slugMiddleware");
-//validation required
+const validateInputs = require("../middlewares/validateInputs");
+const validatorMiddleware = require("../middlewares/validatorMiddleware"); // writeone for the slug validation
+const validator = require("../utils/validator");
+
 router
   .route("/")
-  .get(auth.verifyToken, blogController.getAllBlogs)
+  .get(auth.isauth, blogController.getAllBlogs)
   .post(
     auth.verifyToken,
     auth.allowedTo(roles.ceo, roles.cto),
@@ -15,7 +17,7 @@ router
   );
 router
   .route("/:slug/like")
-  .post( blogController.addLike)
+  .post(blogController.addLike)
   .delete(blogController.deleteLike);
 
 router
@@ -23,12 +25,20 @@ router
   .patch(
     auth.verifyToken,
     auth.allowedTo(roles.ceo, roles.cto),
+    validator.blogValidation,
+    validateInputs,
+    blogController.modifyBlog,
     blogController.publishBlog
   );
 router
   .route("/:slug")
-  .get(auth.verifyToken, blogController.getSingleBlog)
-  .patch(auth.verifyToken, blogController.modifyBlog)
+  .get(auth.isauth, blogController.getSingleBlog)
+  .patch(
+    auth.verifyToken,
+    validator.blogValidation,
+    validateInputs,
+    blogController.modifyBlog
+  )
   .delete(auth.verifyToken, blogController.deleteBlog);
 
 module.exports = router;
