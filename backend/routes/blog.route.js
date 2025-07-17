@@ -14,12 +14,12 @@ router
     blogController.createBlog
   );
 router
-  .route("/like/:slug")
-  .post(slug, blogController.addLike)
+  .route("/:slug/like")
+  .post( blogController.addLike)
   .delete(blogController.deleteLike);
 
 router
-  .route("/publish/:slug")
+  .route("/:slug/publish")
   .patch(
     auth.verifyToken,
     auth.allowedTo(roles.ceo, roles.cto),

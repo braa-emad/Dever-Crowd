@@ -9,13 +9,15 @@ const blogRoutes = require("./routes/blog.route");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const httpResponse = require('./utils/httpResponse')
+
  
 //===================server===================
 const app = express();
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
- 
+ app.set("trust proxy", true);
+
 app.use("/api/admin", adminRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/contact", contactRoutes);
@@ -38,4 +40,3 @@ app.use((err, req, res, next)=>{
 app.listen(process.env.PORT, () => {
   console.log(`server running on http://localhost:${process.env.PORT}/`);
 });
-

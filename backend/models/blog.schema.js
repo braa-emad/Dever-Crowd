@@ -29,7 +29,7 @@ const blogSchema = mongoose.Schema(
       type: String,
       required: false,
     },
-    Category: {
+    category: {
       type: String,
       required: false,
     },
@@ -56,13 +56,6 @@ const blogSchema = mongoose.Schema(
       required: true,
       unique: true,
     },
-
-    pic: [
-      {
-        type: String,
-        required: false,
-      },
-    ],
     tags: [
       {
         type: String,
@@ -77,6 +70,10 @@ const blogSchema = mongoose.Schema(
     views: {
       type: Number,
       default: 0,
+    },
+    publish_date: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

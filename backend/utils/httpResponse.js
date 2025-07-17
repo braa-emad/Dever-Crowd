@@ -77,6 +77,20 @@ const message = {
 
   getBlogs: "Blogs Fetched successfully.",
   createBlog: "Blog created successfully.",
+  likeAdded: "Like added successfully.",
+  alreadyLiked: "You have already liked this blog.",
+  blogNotFound: "Blog not found.",
+  blogNotPublished: "Blog is not published.",
+  blogPublished: "Blog published successfully.",
+  blogModified: "Blog modified successfully.",
+  blogDeleted: "Blog deleted successfully.",
+  blogNotFound: "Blog not found.",
+  blogNotModified: "Blog not modified.",
+  blogNotDeleted: "Blog not deleted.",
+  blogNotCreated: "Blog not created.",
+  likeRemoved: "Like removed successfully.",
+  UnableToDeleteLike: "Unable to delete like, it was not found.",
+  blogAlreadyPublished: "Blog is already published.",
 };
 
 module.exports = {
