@@ -4,7 +4,7 @@ const blogController = require("../controller/blog.controller");
 const auth = require("../middlewares/auth");
 const roles = require("../utils/roles");
 const validateInputs = require("../middlewares/validateInputs");
-const validatorMiddleware = require("../middlewares/validatorMiddleware"); // writeone for the slug validation
+const validatorMiddleware = require("../middlewares/validatorMiddleware");
 const validator = require("../utils/validator");
 
 router
@@ -17,14 +17,13 @@ router
   );
 router
   .route("/:slug/like")
-  .post(blogController.addLike)
-  .delete(blogController.deleteLike);
+  .post(auth.isauth, blogController.addLike)
+  .delete(auth.isauth, blogController.deleteLike);
 
 router
   .route("/:slug/publish")
   .patch(
     auth.verifyToken,
-    auth.allowedTo(roles.ceo, roles.cto),
     validator.blogValidation,
     validateInputs,
     blogController.modifyBlog,

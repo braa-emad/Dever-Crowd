@@ -6,6 +6,7 @@ const status = {
   unauthenticated: 403,
   notfound: 404,
   conflict: 409,
+  noContent: 204,
 };
 const message = {
   requiredFields: "All fields are required.",

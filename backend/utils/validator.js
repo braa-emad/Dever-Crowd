@@ -240,24 +240,15 @@ const blogValidation = [
     .notEmpty()
     .withMessage("Category is required"),
 
-  body("writer").isMongoId().withMessage("Invalid writer ID"),
-
   body("writer_pic")
     .optional()
     .isURL()
     .withMessage("Writer pic must be a valid URL"),
 
-  body("featured_image")
-    .optional()
-    .isURL()
-    .withMessage("Featured image must be a valid URL"),
-
   body("status")
     .optional()
     .isIn(["draft", "published"])
     .withMessage("Status must be 'draft' or 'published'"),
-
-  body("slug").notEmpty().withMessage("Slug is required").trim().escape(),
 
   body("content").optional().isString().customSanitizer(sanitizeContent),
 

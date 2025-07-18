@@ -19,7 +19,10 @@ router.route("/authtest").get(auth.verifyToken, adminController.authtest);
 router
   .route("/login")
   .post(
-    rateLimit.formRateLimiter,validator.loginValidator(), validateInputs, adminController.Login
+    // rateLimit.formRateLimiter,
+    validator.loginValidator(),
+    validateInputs,
+    adminController.Login
   );
 
 router

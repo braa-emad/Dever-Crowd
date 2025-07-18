@@ -35,12 +35,12 @@ const blogSchema = mongoose.Schema(
     },
     writer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin", // only admins can write blogs
-      required: true, // new comment
+      ref: "Admin",
+      required: true,
     },
     writer_pic: {
       type: String,
-      default: "this is the profile picture", // default image here
+      default: "https://res.cloudinary.com/dlx9aqseo/image/upload/v1752824800/projects/yasmilrzpceyzs6sauqd.png"
     },
     featured_image: {
       type: String,

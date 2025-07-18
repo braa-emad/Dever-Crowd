@@ -7,7 +7,7 @@ const generateUniqueSlug = require("../utils/generateSlug");
 const sortBlogs = require("../utils/SortingBlogs.js");
 
 const getAllBlogs = asyncwrapper(async (req, res, next) => {
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const limit = parseInt(req.query.limit, 10) || 100;
   const page = parseInt(req.query.page, 10) || 1;
   const skip = limit * (page - 1);
 
@@ -15,15 +15,7 @@ const getAllBlogs = asyncwrapper(async (req, res, next) => {
 
   const query = isAuthenticated ? {} : { status: "published" };
 
-  const selectFields = isAuthenticated
-    ? undefined
-    : "title subtitle category slug publish_date";
-
-  const blogs = await Blog.find(query)
-    .select(selectFields)
-    .limit(limit)
-    .skip(skip)
-    .lean();
+  const blogs = await Blog.find(query).limit(limit).skip(skip).lean();
   if (!blogs.length) {
     const error = errorHandler.create({
       status: httpResponse.message.NoBlogsnow,
@@ -31,7 +23,6 @@ const getAllBlogs = asyncwrapper(async (req, res, next) => {
     });
     return next(error);
   }
-
   const sortedBlogs = sortBlogs(blogs);
   res.json({
     status: httpresponses.status.ok,
@@ -45,13 +36,16 @@ const getSingleBlog = asyncwrapper(async (req, res, next) => {
 
   const isAuthenticated = Boolean(req.user);
 
-  const query = {
-    slug,
-    ...(isAuthenticated ? {} : { status: "published" }),
-  };
-
-  const blog = await Blog.findOne(query);
+  console.log(slug);
+  const blog = await Blog.findOne({ slug });
   if (!blog) {
+    const error = errorHandler.create({
+      status: httpresponses.status.notfound,
+      message: httpresponses.message.blogNotFound,
+    });
+    return next(error);
+  }
+  if (!isAuthenticated && blog.status !== "published") {
     const error = errorHandler.create({
       status: httpresponses.status.notfound,
       message: httpresponses.message.blogNotFound,
@@ -61,8 +55,9 @@ const getSingleBlog = asyncwrapper(async (req, res, next) => {
   if (
     (!isAuthenticated || req.user.id !== blog.writer.toString()) &&
     blog.status === "published"
-  )
+  ) {
     blog.views = (blog.views || 0) + 1;
+  }
 
   await blog.save();
   res.json({
@@ -94,7 +89,7 @@ const createBlog = asyncwrapper(async (req, res, next) => {
 });
 
 const publishBlog = asyncwrapper(async (req, res, next) => {
-  const slug = req.params.slug;
+  const slug = req.slug;
 
   let blog = await Blog.findOne({ slug });
 
@@ -124,7 +119,6 @@ const publishBlog = asyncwrapper(async (req, res, next) => {
 
   blog.status = "published";
 
-  blog.slug = await generateUniqueSlug(blog.title);
   blog.publish_date = new Date();
   await blog.save();
   res.json({
@@ -136,8 +130,7 @@ const publishBlog = asyncwrapper(async (req, res, next) => {
 
 const modifyBlog = asyncwrapper(async (req, res, next) => {
   const slug = req.params.slug;
-  const { title, subtitle, category, featured_image, tags, content } =
-    req.body;
+  const { title, subtitle, category, featured_image, tags, content } = req.body;
 
   let blog = await Blog.findOne({ slug });
 
@@ -175,10 +168,15 @@ const modifyBlog = asyncwrapper(async (req, res, next) => {
     blog.slug = await generateUniqueSlug(title);
   }
   await blog.save();
+
+  if (req.route.path === "/:slug/publish") {
+    req.slug = blog.slug;
+    return next();
+  }
   res.json({
     status: httpresponses.status.ok,
     message: httpresponses.message.blogModified,
-    data: { slug: blog.slug },
+    data: { blog },
   });
 });
 
@@ -212,6 +210,7 @@ const addLike = asyncwrapper(async (req, res, next) => {
   const ip = req.ip;
   const userAgent = req.headers["user-agent"];
   const blog = await Blog.findOne({ slug });
+  const userId = req.user ? req.user.id : null;
 
   if (!blog) {
     const error = errorHandler.create({
@@ -232,6 +231,14 @@ const addLike = asyncwrapper(async (req, res, next) => {
   const alreadyLiked = blog.likes.some(
     (like) => like.ip === ip || like.userAgent === userAgent
   );
+  if (blog.writer.toString() === userId) {
+    res.json({
+      status: httpresponses.status.noContent,
+      message: httpresponses.message.blogAlreadyLiked,
+      data: { totalLikes: blog.likes.length },
+    });
+    return;
+  }
 
   if (alreadyLiked) {
     res.json({
@@ -294,7 +301,7 @@ const deleteLike = asyncwrapper(async (req, res, next) => {
     message: httpresponses.message.likeRemoved,
     data: { totalLikes: blog.likes.length },
   });
-}); // add & delete have a problem did you get it?
+});
 
 module.exports = {
   getAllBlogs,
